@@ -6,13 +6,12 @@ import hashlib
 import sqlite3
 import random
 import string
+import financialCalcFunctions as func
 
-# Function maint
-# Parameter cmd (array) : Commands separated by spaces
-# Parameter c : Database connection
+# Function createSalt
+# Parameter length (int) : Length of the salt
 #
-# Description: Either reads the conversion rate between two currencies or create a new currency
-#				calls either the maintRead function or the maintWrite function
+# Description: Creates a random string of a specified length to be used as password salt
 def createSalt(length):
 	salt = "";
 	for i in range (length):
@@ -20,7 +19,14 @@ def createSalt(length):
 	#print("salt = " + salt)
 	return(salt)
 
-#return 1 if validated, 0 if unvalidated
+# Function login
+# Parameter username (string) : username
+# Parameter password (string) : password
+# Parameter c : Database connection
+#
+# return ret (array) : user credentials.
+#
+# Description: Validates login. If validated returns user credentials in an array
 def login(username, password, c):
 	success = 0
 	ret = [-1, -1, "", -1] #[uid, permissions, username, balance]
@@ -53,9 +59,15 @@ def login(username, password, c):
 		print("Username/Password combination does not match")
 	return(ret)
 
+
+
+# Function addUser
+# Parameter cmd (array) : Commands separated by spaces
+# Parameter c : Database connection
+#
+# Description: Creates a user. Assume balance is 0 if balance is not given
+
 #ADDUSER username, password, permission, balance
-#assume balance is 0 if balance is not given
-#length = 5
 def addUser(cmd, c):
 	#check if user exist (check uname and/or UID?)
 	#ERROR If user already exists
@@ -110,6 +122,11 @@ def addUser(cmd, c):
 	c.execute(query)
 	print("User added")
 
+# Function deleteUser
+# Parameter cmd (array) : Commands separated by spaces
+# Parameter c : Database connection
+#
+# Description: Deletes a user
 #DELUSER UID
 def deleteUser(cmd, c):
 	#check if user exists
@@ -144,3 +161,36 @@ def deleteUser(cmd, c):
 				print("User deleted")
 			else:
 				print("User delete canceled")
+
+# Function getBalance
+# Parameter cmd (array) : Commands separated by spaces
+# Parameter userData (array) : Holds user credentials
+# Parameter c : Database connection
+#
+# Description: Prints user balance. Assume USD if curency is not specified
+def getBalance(cmd, userData, c): #BALANCE VAL currencyCode
+	query = ""
+	num = 0;
+	uid = userData[0]
+	currBalance = 0;
+
+	if(len(cmd) < 1):
+		print("Invalid input")
+		return "a"
+	elif(len(cmd) == 1):
+		cmd.append("USD")
+
+	#get userbalance
+	query = "SELECT balance FROM users WHERE uid=" + str(userData[0])
+	c.execute(query);
+	stkdata = c.fetchall();
+	if(len(stkdata) != 1):
+		print("User not found")
+		return()
+	else:
+		row = stkdata[0]
+		balance = row[0]
+		conv = [balance, "USD" , cmd[1]]
+		balance = func.conversion(conv, c)
+		if(balance != - 1):
+			print("Your balance is " + str(balance) + " " + cmd[1])

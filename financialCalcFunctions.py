@@ -194,6 +194,8 @@ def transaction(cmd, c):
 # Parameter cmd (array) : Commands separated by spaces
 # Parameter c : Database connection
 #
+# return conv (float) : converted value
+#
 # Description: converts currencies
 def conversion(cmd, c):
 	if(len(cmd) < 3):
@@ -208,16 +210,16 @@ def conversion(cmd, c):
 
 		if(len(stkdata) < 1):
 			print("Currencies not found")
-			return(0)
+			return(-1)
 
 		row = stkdata[0]
 
 		if(len(row) < 4):
 			print("Currencies not found")
-			return(0)
+			return(-1)
 		elif(row[1] == None or row[3] == None):
 			print("Currencies not found")
-			return(0)
+			return(-1)
 
 		try:
 			conv = (cmd[0] * row[1]) / row[3]
@@ -228,15 +230,17 @@ def conversion(cmd, c):
 		return(float(conv))
 
 
-# Function transaction
+# Function add
 # Parameter cmd (array) : Commands separated by spaces
+# Parameter userData (array) : Holds user credentials
 # Parameter c : Database connection
 #
-# Description: Can increase or decrease the balance of a specified user. If currency is not given, assumes dollar
+# Description: Adds a specified amount to the user's balance.
 def add(cmd, userData, c): #ADD 5 USD
 	query = ""
 	num = 0;
 	uid = userData[0]
+	currBalance = 0;
 
 	if(len(cmd) < 2):
 		print("Invalid input")
@@ -256,23 +260,37 @@ def add(cmd, userData, c): #ADD 5 USD
 	#if(num == 0):
 	#	return()
 
+	#get userbalance
+	query = "SELECT uid, balance FROM users WHERE uid=" + str(userData[0])
+	c.execute(query);
+	stkdata = c.fetchall();
+	if(len(stkdata) != 1):
+		print("User not found")
+		return()
+	else:
+		row = stkdata[0]
+		currBalance = row[1]
+
+
 	#userData = stkdata[0]
-	newBalance = userData[3] + num
+	newBalance = currBalance + num
 	newBalance = round(newBalance, 2)
 	userData[3] = newBalance
-	print("You now have $" + str(newBalance) + " in balance")
+	print("You now have $" + str(newBalance) + " in balance") #Gives balance in dollar due to gold standard implimentation
 	query = "UPDATE users SET balance = " + str(newBalance) + " WHERE uid = " + str(uid)
 	c.execute(query);
 
-# Function transaction
+# Function subtract
 # Parameter cmd (array) : Commands separated by spaces
+# Parameter userData (array) : Holds user credentials
 # Parameter c : Database connection
 #
-# Description: Can increase or decrease the balance of a specified user. If currency is not given, assumes dollar
-def subtract(cmd, userData, c): #ADD 5 USD
+# Description: Subtracts a specified amount from the user's balance.
+def subtract(cmd, userData, c): #SUB 5 USD
 	query = ""
 	num = 0;
 	uid = userData[0]
+	currBalance = 0;
 
 	if(len(cmd) < 2):
 		print("Invalid input")
@@ -288,24 +306,35 @@ def subtract(cmd, userData, c): #ADD 5 USD
 		print("Please input float value")
 		return()
 	conv = [num, cmd[2] , "USD"]
-	num = conversion(conv, c)
+	num = conversion(conv, c) #converts
 	#if(num == 0):
 	#	return()
 
+	#get userbalance
+	query = "SELECT uid, balance FROM users WHERE uid=" + str(userData[0])
+	c.execute(query);
+	stkdata = c.fetchall();
+	if(len(stkdata) != 1):
+		print("User not found")
+		return()
+	else:
+		row = stkdata[0]
+		currBalance = row[1]
+
 	#userData = stkdata[0]
-	newBalance = userData[3] - num
+	newBalance = currBalance - num
 	newBalance = round(newBalance, 2)
 	userData[3] = newBalance
-	print("You now have $" + str(newBalance) + " in balance")
+	print("You now have $" + str(newBalance) + " in balance") #Gives balance in dollar due to gold standard implimentation
 	query = "UPDATE users SET balance =" + str(newBalance) + " WHERE uid = " + str(uid)
 	c.execute(query);
 
 
-# Function transaction
+# Function wire
 # Parameter cmd (array) : Commands separated by spaces
 # Parameter c : Database connection
 #
-# Description: Can increase or decrease the balance of a specified user. If currency is not given, assumes dollar
+# Description: Transfers funds from one user to another
 # WIRE user1 user2 amt currency
 def wire(cmd, c):
 	#print(cmd)
@@ -365,8 +394,8 @@ def wire(cmd, c):
 	user1Balance = round(user1Balance, 2)
 	user2Balance = user2Balance + num
 	user2Balance = round(user2Balance, 2)
-	print("user " + user1 + " now has $" + str(user1Balance) + " in balance")
-	print("user " + user2 + " now has $" + str(user2Balance) + " in balance")
+	print("user " + user1 + " now has $" + str(user1Balance) + " in balance") #Gives balance in dollar due to gold standard implimentation
+	print("user " + user2 + " now has $" + str(user2Balance) + " in balance") #Gives balance in dollar due to gold standard implimentation
 
 	query = "UPDATE users SET balance = " + str(user1Balance) + " WHERE uid = " + str(uid1)
 	c.execute(query);

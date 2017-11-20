@@ -14,16 +14,18 @@ if not os.path.isfile("currency.db"):
 conn = sqlite3.connect('currency.db');
 c = conn.cursor(); #Connection to sqlite database
 
-#[uid, permissions, username, balance]
-userData = [-1, -1, "", -1.1]
+#[uid, permissions, username]
+userData = [-1, -1, ""]
 
 
 running = 1;
 #loggedIn = 0;
 
 #Main interface of the program, promts the user for an input. Terminates of the user types "exit"
+print("------------------------------")
 print("Welcome to Financial Calculator. This program allows you to keep track of multiple users")
 print("and change their balance with different currencies")
+print("This Program uses USD as the Gold Standard and will usually display USD. On some functions it is possible to specify currency")
 print("------------------------------")
 
 while(userData[0] == -1):
@@ -46,6 +48,8 @@ while(running == 1):
 		print("List of commands:\n")
 		print("exit - exit the program\n")
 		print("help - display list of commands\n")
+		print("GETBALANCE - get your balance in a specified currency")
+		print("parameters: currencyCode - if currencyCode is not specified, assume USD\n")
 		print("MAINT - Allow currency conversion data to be entered (or read in)")
 		print("parameters: (MAINT read currencyCode1 currencyCode2) OR (MAINT write currencyName currencyCode valueInDollar)")
 		print("OR call MAINT by itself\n")
@@ -54,11 +58,11 @@ while(running == 1):
 		print("transaction - do a transaction")
 		print("parameters: transaction userName value currencyCode - Currency Code is optional, will assume dollar if unspecified\n")
 		print("ADD - add to balance")
-		print("parameters: ammount, currencyCode - Currency Code is optional, will assume dollar if unspecified\n")
+		print("parameters: amount, currencyCode - Currency Code is optional, will assume dollar if unspecified\n")
 		print("SUB - subtract from balance")
-		print("parameters: ammount, currencyCode - Currency Code is optional, will assume dollar if unspecified\n")
+		print("parameters: amount, currencyCode - Currency Code is optional, will assume dollar if unspecified\n")
 		print("WIRETO - Do a wire transfer to another user")
-		print("parameters: username ammount currencyCode - currency Code is optional, will assume dollar if unspecified\n")
+		print("parameters: username amount currencyCode - currency Code is optional, will assume dollar if unspecified\n")
 
 		if(userData[1] == 7):
 			print("")
@@ -82,6 +86,8 @@ while(running == 1):
 			func.userList(c)
 		elif(cmd[0] == "transaction"):
 			func.transaction(cmd, c)
+		elif(cmd[0] == "GETBALANCE"):
+			userFunc.getBalance(cmd, userData, c)
 		elif(cmd[0] == "ADD"):
 			func.add(cmd, userData, c)
 		elif(cmd[0] == "SUB"):
