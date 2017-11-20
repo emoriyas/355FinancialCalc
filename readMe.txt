@@ -5,6 +5,7 @@ Description: A financial program that tracks of multiple users and currencies
 *Requires all files to be in the same directory
 -main.py
 -financialCalcFunctions.py
+-financialCalcUserFunctions.py
 -currency.db
 
 uses sqlite database and uses sqlite3 module, which is part of standard Python library since Python 2.5
