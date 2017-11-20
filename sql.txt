@@ -1,0 +1,23 @@
+.separator ','
+
+CREATE TABLE currency(cid integer PRIMARY KEY, cname text, ccode text, dollarVal float);
+
+INSERT INTO currency VALUES (0, "Dollar", "USD", 1);
+INSERT INTO currency VALUES (1, "Euro", "EUR", 1.18);
+INSERT INTO currency VALUES (2, "Yuan", "CNY", 0.15);
+
+/*
+user permission:
+0 = user
+7 = admin
+*/
+CREATE TABLE users(uid integer PRIMARY KEY, permissions integer, username text UNIQUE, password text, salt text, balance float);
+INSERT INTO users VALUES(0, 7, "admin", "7fcaa42063ca6470773b9d3101db1c44706f1dceefed59ff2e1554630aef4efc", "0fwwRvLxGV", 1337);
+INSERT INTO users VALUES(1, 1, "user1", "66e905518822726a0045175ad575a5825d8f767c8091c7f54abbec1a2b7f148b", "NeaBqHX6Vr", 5);
+
+CREATE TABLE transactions (tid integer PRIMARY KEY, uid integer, amt float);
+
+
+SELECT * FROM currency as ca 
+LEFT JOIN currency as cb ON ca.ccode="EUR" AND cb.ccode="CNY"
+WHERE ca.ccode="EUR"
